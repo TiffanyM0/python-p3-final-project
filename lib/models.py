@@ -1,5 +1,11 @@
+from sqlalchemy import create_engine,UniqueConstraint, ForeignKey, PrimaryKeyConstraint, Table, Column, Integer, Numeric, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+Base = declarative_base()
+
 def main ():
-    print ('Hello!!')
+    print ('Welcome to LibraryCLI!!')
     book_list = []
     choice = 0
     while choice != 5:
@@ -36,22 +42,15 @@ def main ():
     
     print('Program Terminated')
 
-class Library:
-    def __init__(self) -> None:
-        pass
-
-
-class User:
-    def __init__(self):
-        self.name = input('Enter the name of the user >>>')
-        self.email = input('Enter the email of the user >>>')
-
-        #user tasks; 
-        # implement email check on input
-        #add user functionality and linking to database
-
-class Book:
+class Book(Base):
+    
     book_list = []
+
+    __tablename__ = 'books'
+    book_id = Column('book_id', Integer, primary_key=True)
+    book_title = Column('Book_Title', String)
+
+
     def __init__(self):
         self._name = input('Enter the name of the book >>>')
         self._author = input('Enter the name of the Author >>>')
@@ -60,9 +59,45 @@ class Book:
         #dict or list ??
         Book.book_list.append([self._name, self._author, self._pages])
         print(Book.book_list)
+    
+    def __repr__(self):
+        return f'Book is {self._name} '\
+        + f'{self._author}' \
+        + f'{self._pages}'
 
 
+class User(Base):
+    __tablename__ = 'users'
+    __table_args__ = (
+        UniqueConstraint(
+            'User_Email',
+            name='unique_email'
+        ),
+    )
+    id = Column('User_Id', Integer, primary_key=True)
+    name = Column('User_Name', String)
+    email = Column('User_Email', String)
+    # book_borrowed = Column('Borrowed', ForeignKey=('book_id'))
 
+
+    def __init__(self):
+        self.name = input('Enter the name of the user >>>')
+        self.email = input('Enter the email of the user >>>')
+
+        #user tasks; 
+        # implement email check on input
+        #add user functionality and linking to database
+    def __repr__(self):
+        return f"User {self.name}: " \
+        + f"{self.email}"
+
+engine = create_engine("sqlite:///db/library.db", echo=True)
+Base.metadata.create_all(bind=engine)
 
 if __name__ == "__main__":
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
     main()
+    books = session.query()
+    session.commit()
