@@ -1,15 +1,18 @@
 import os
 import sys
+# from faker import faker
 
+# fake = faker()
 
 from models import *
 
 if __name__ == "__main__":
     Session = sessionmaker(bind=engine)
     session = Session()
-    book1 = Book('Alice in Wonderland', 'J Schout', 232)
-    
+
     main()
-    books = session.query()
+
+    books = session.query(Column('books'))
+
     session.commit()
     session.close()
