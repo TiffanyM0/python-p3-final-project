@@ -37,6 +37,7 @@ if __name__ == '__main__':
         'net',
         'org'
     )
+    
     for i in range(50):  
 
         first = fake.unique.first_name()
@@ -48,7 +49,7 @@ if __name__ == '__main__':
             length=1
         )[0]
 
-        email = f"{first}.{last}.{dns_org}".lower()
+        email = f"{first}.{last}@gmail.{dns_org}".lower()
 
         user = User(
             first_name=first,

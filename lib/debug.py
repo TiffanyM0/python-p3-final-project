@@ -4,7 +4,8 @@ import sys
 
 # fake = faker()
 
-from models import *
+from __init__ import *
+from models import main
 
 if __name__ == "__main__":
     Session = sessionmaker(bind=engine)
