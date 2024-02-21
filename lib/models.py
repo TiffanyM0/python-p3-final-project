@@ -49,36 +49,37 @@ class Book(Base):
     __tablename__ = 'books'
     book_id = Column('book_id', Integer, primary_key=True)
     book_title = Column('Book_Title', String)
-
+    book_author = Column('Author', String)
+    published = Column('Year Published', Integer)
 
     def __init__(self):
-        self._name = input('Enter the name of the book >>>')
+        self._title = input('Enter the name of the book >>>')
         self._author = input('Enter the name of the Author >>>')
-        self._pages = input('Enter the number of the Pages >>>')
+        self._published = input('Enter the year of publication >>>')
 
         #dict or list ??
-        Book.book_list.append([self._name, self._author, self._pages])
+        Book.book_list.append([self._title, self._author, self._published])
         print(Book.book_list)
     
     def __repr__(self):
-        return f'Book is {self._name} '\
+        return f'Book is {self._title} '\
         + f'{self._author}' \
-        + f'{self._pages}'
+        + f'{self._published}'
 
 
 class User(Base):
     __tablename__ = 'users'
-    __table_args__ = (
-        UniqueConstraint(
-            'User_Email',
-            name='unique_email'
-        ),
-    )
-    id = Column('User_Id', Integer, primary_key=True)
-    name = Column('User_Name', String)
-    email = Column('User_Email', String)
-    # book_borrowed = Column('Borrowed', ForeignKey=('book_id'))
+    # __table_args__ = (
+    #     UniqueConstraint(
+    #         'User_Email',
+    #         name='unique_email'
+    #     ),
+    # )
 
+    id = Column('user_Id', Integer, primary_key=True)
+    name = Column('user_Name', String)
+    email = Column('user_Email', String, unique=True)
+    # book_borrowed = Column('Borrowed', ForeignKey=('book_id'))
 
     def __init__(self):
         self.name = input('Enter the name of the user >>>')
@@ -88,16 +89,15 @@ class User(Base):
         # implement email check on input
         #add user functionality and linking to database
     def __repr__(self):
-        return f"User {self.name}: " \
-        + f"{self.email}"
+        return f"User {self.__class__.name}: " \
+        + f"{self.__class__.email}"
 
-engine = create_engine("sqlite:///db/library.db", echo=True)
+class Borrowed(Base):
+    __tablename__ = 'books_in_circulation'
+    id = Column(Integer, primary_key=True)
+    user_Id = Column(Integer, ForeignKey('users'))
+    book_id = Column(Integer, ForeignKey('books'))
+
+engine = create_engine('sqlite:///library.db', echo=True)
 Base.metadata.create_all(bind=engine)
 
-if __name__ == "__main__":
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    main()
-    books = session.query()
-    session.commit()
