@@ -36,7 +36,15 @@ def main ():
 
                 if choice == 1:
                     print('Adding a book...')
-                    Book()
+                    title = input('Enter the title of the book: ')
+                    author = input('Enter the name of the author: ')
+                    published = int(input('Enter the year of publication: '))
+
+                    new_book = Book(book_title=title, book_author=author, published=published)
+
+                    session.add(new_book)
+                    session.commit()  
+
                     print('Book Added Successfully')
                     print(Book.book_list)  
 
@@ -66,9 +74,18 @@ def main ():
 
                 if choice == 1:
                     print('--- Setting up User ---')
-                    User()
+                    first_name = input('Enter the first name of the user: ')
+                    last_name = input('Enter the last name of the user: ')
+                    email = input('Enter the email of the user: ')
+
+                    new_user = User(first_name=first_name, last_name=last_name, email=email)
+
+                    session.add(new_user)
+                    session.commit()                    
+                    
                     print('User added successfully')
                     print(f'{User.users_list}')
+
                 elif choice == 2:
                     print('Borrowing a book....')
                     book_to_borrow=input('Enter title of book to borrow >>> ')
@@ -109,23 +126,22 @@ class Book(Base):
     # child=relationship('Child',back_populates='parent',uselist=False,cascade="all, delete")
     circulate = relationship('circulate',back_populates='books', uselist=False,cascade="all, delete" )
 
-    def __init__(self):
-        self._title = input('Enter the name of the book >>>  ')
-        self._author = input('Enter the name of the Author >>>  ')
-        self._published = input('Enter the year of publication >>>  ')
-
+    def __init__(self, title, author, published):
+        self.book_title = title
+        self.book_author = author
+        self.published = published
         #dict or list ??
-        Book.book_list.append([self._title, self._author, self._published])
+        Book.book_list.append([self.book_title, self.book_author, self.published])
         # print(Book.book_list)
     
     def update_status(self):
-        self.__class__.books_borrowed.append([self._title, self._author, self._published])
+        self.__class__.books_borrowed.append([self.title, self.author, self.published])
 
 
     def __repr__(self):
-        return f'Book is {self._title} '\
-        + f'{self._author}' \
-        + f'{self._published}'
+        return f'Book is {self.title} '\
+        + f'{self.author}' \
+        + f'{self.published}'
 
 
 class User(Base):
@@ -138,19 +154,21 @@ class User(Base):
     #     ),
     # )
     user_id = Column('user_id', Integer, primary_key=True)
-    name = Column('user_Name', String)
-    email = Column('user_Email', String, unique=True)
+    first_name = Column('user_firstname', String)
+    last_name = Column('user_lastname', String)
+    email = Column('user_email', String, unique=True)
 
     circulate = relationship('circulate', back_populates="users", uselist=False,cascade="all, delete")
     # book_borrowed = Column('Borrowed', ForeignKey=('book_id'))
 
-    def __init__(self):
-        self.name = input('Enter the name of the user >>>  ')
-        self.email = input('Enter the email of the user >>>  ')
-        #user tasks; 
+    def __init__(self, first_name, last_name, email):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email = email
+        # user tasks; 
         # implement email check on input
         #add user functionality and linking to database
-        User.users_list.append([self.name, self.email])
+        User.users_list.append([self.first_name, self.last_name, self.email])
 
     def __repr__(self):
         return f"User {self.__class__.name}: " \
@@ -172,6 +190,6 @@ session = Session()
 
 Base.metadata.create_all(bind=engine)
 
-new_book = Book('The Great Gatsby', 'F. Scott Fitzgerald',1925)
-session.add(new_book)
+# new_book = Book()
+# session.add(new_book)
 session.commit()
