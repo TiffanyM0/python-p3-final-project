@@ -6,11 +6,10 @@ engine = create_engine('sqlite:///library.db', echo=True)
 Base = declarative_base()
 Base.metadata.create_all(bind=engine)
 
-
 def main ():
     print ('*****Welcome to LibraryCLI!!*****')
     choice = 0
-    while choice != 5:
+    while choice != 6:
         print('*** Book Manager ***')
         print('1) Add a book')
         print('2) Lookup a Book')
@@ -24,7 +23,7 @@ def main ():
             print('Adding a book...')
             Book()
             print('Book Added Successfully')
-            print(f'{Book.book_list}')
+            print(Book.book_list)           
 
         elif choice == 2:
             print('Looking up book')
@@ -41,17 +40,19 @@ def main ():
         elif choice == 4:
             print('--- Setting up User ---')
             User()
+            print('User added successfully')
             print(f'{User.users_list}')
         
         # borrowing book should update book borrowed table.
         elif choice == 5:
             print('Borrowing a book....')
+            book_to_borrow=input('Enter title of book to borrow >>> ')
             for book in Book.book_list:
                 for item in Book.books_borrowed:
-                    if book == item:
+                    if book_to_borrow == item:
                         print("Book is Unavailable")
                     else:
-                        Book.books_borrowed.append(book)
+                        Book.books_borrowed.append(book_to_borrow)
                         print(f'<<< Please take {Book._title} at front desk >>>')
 
         elif choice == 6:
@@ -60,7 +61,6 @@ def main ():
     print('Program Terminated')
 
 class Book(Base):
-    
     book_list = []
     books_borrowed = []
 
@@ -70,6 +70,9 @@ class Book(Base):
     book_author = Column('Author', String)
     published = Column('Year Published', Integer)
     borrowed = Column(Boolean(), default=False)
+
+    # child=relationship('Child',back_populates='parent',uselist=False,cascade="all, delete")
+    circulate = relationship('circulate',back_populates='books', uselist=False,cascade="all, delete" )
 
     def __init__(self):
         self._title = input('Enter the name of the book >>>')
@@ -92,7 +95,6 @@ class Book(Base):
 
 class User(Base):
     __tablename__ = 'users'
-
     users_list= []
     # __table_args__ = (
     #     UniqueConstraint(
@@ -100,11 +102,11 @@ class User(Base):
     #         name='unique_email'
     #     ),
     # )
-    id = Column('user_Id', Integer, primary_key=True)
+    user_id = Column('user_id', Integer, primary_key=True)
     name = Column('user_Name', String)
     email = Column('user_Email', String, unique=True)
 
-    borrowed = relationship("Borrowed", back_populates="user", passive_deletes=True)
+    circulate = relationship('circulate', back_populates="users", uselist=False,cascade="all, delete")
     # book_borrowed = Column('Borrowed', ForeignKey=('book_id'))
 
     def __init__(self):
@@ -119,13 +121,13 @@ class User(Base):
         return f"User {self.__class__.name}: " \
         + f"{self.__class__.email}"
 
-class Borrowed(Base):
-    __tablename__ = 'books_in_circulation'
+class circulate(Base):
+    __tablename__ = 'circulate'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete="CASCADE"), nullable=False, unique=True)
+    user_id = Column(Integer, ForeignKey('users.user_id', ondelete="CASCADE"), nullable=False, unique=True)
     book_id = Column(Integer, ForeignKey('books.book_id'), nullable=False)
 
-    book = relationship("Book", backref=backref('books_in_circulation', borrowed_by = id))
-    user = relationship("users", uselist=False)
-
+    books = relationship("Book", back_populates='circulate')
+    users = relationship("User", back_populates='circulate')
+    #parent=relationship('Parent',back_populates='child')
 
