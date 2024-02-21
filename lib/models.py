@@ -2,7 +2,10 @@ from sqlalchemy import create_engine,UniqueConstraint, ForeignKey, PrimaryKeyCon
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+engine = create_engine('sqlite:///library.db', echo=True)
 Base = declarative_base()
+Base.metadata.create_all(bind=engine)
+
 
 def main ():
     print ('Welcome to LibraryCLI!!')
@@ -98,6 +101,4 @@ class Borrowed(Base):
     user_Id = Column(Integer, ForeignKey('users'))
     book_id = Column(Integer, ForeignKey('books'))
 
-engine = create_engine('sqlite:///library.db', echo=True)
-Base.metadata.create_all(bind=engine)
 
